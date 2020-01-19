@@ -33,32 +33,39 @@ def get_tweet_sentiment(tweet):
     using textblob's sentiment method
     '''
     # create TextBlob object of passed tweet text
-    analysis = TextBlob(clean_tweet(tweet))
+    # analysis = TextBlob(clean_tweet(tweet))
+    analysis = TextBlob(tweet)
     # set sentiment
-    return analysis.sentiment.polarity
+    return analysis.sentiment
+    # return analysis.sentiment.polarity
 
 
-def get_tweets(query, count=5):
+def get_tweets(query, count=300):
     '''
     Main function to fetch tweets and parse them.
     '''
     # empty list to store parsed tweets
     tweets = []
+    average_sentiment = 0
+    num = 0
 
     try:
         # call twitter api to fetch tweets
         fetched_tweets = api.search(q=query, count=count)
-
+        num = len(fetched_tweets)
+        print("length", num)
         # parsing tweets one by one
         for tweet in fetched_tweets:
             # empty dictionary to store required params of a tweet
             parsed_tweet = {}
             # saving text of tweet
-            parsed_tweet['text'] = tweet.text
+            parsed_tweet['text'] = clean_tweet(tweet.text)
             # saving sentiment of tweet
             parsed_tweet['sentiment'] = get_tweet_sentiment(tweet.text)
+            sent = get_tweet_sentiment(tweet.text)
+            average_sentiment += sent * 100
+            print(sent * 100)
             parsed_tweet['retweets'] = tweet.retweet_count
-
             # appending parsed tweet to tweets list
             if tweet.retweet_count > 0:
                 # if tweet has retweets, ensure that it is appended only once
@@ -68,13 +75,15 @@ def get_tweets(query, count=5):
                 tweets.append(parsed_tweet)
 
                 # return parsed tweets
-        return tweets
+        return (average_sentiment / num)
 
     except tweepy.TweepError as e:
         # print error (if any)
         print("Error : " + str(e))
 
 
-# print(get_tweets("waterloo"))
+def get_tweet_sentiments(query):
+    return (get_tweets(query.upper()) + get_tweets(query.capitalize()) + get_tweets(query.lower()))/3
 
-print(get_tweet_sentiment("honestly this movie isn't terrible but it could be better, overall 7/10"))
+
+print(get_tweet_sentiment("I knew that Trump fit the stereotypical profile of all cult leaders, which is essentially malignant narcissism, which is the narcissism – plus the psychopathic elements of feeling above the law, the pathological lying, paranoia, jealousy, the harassment."))
