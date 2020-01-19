@@ -1,7 +1,12 @@
 import re
 import tweepy
 from tweepy import OAuthHandler
-from textblob import TextBlob
+import nltk
+nltk.download('vader_lexicon')
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from rake_nltk import Rake
+import json
+from gensim.summarization import keywords
 
 consumer_key = 'elSaHjf5iVQcWZcSxBJkmTpc8'
 consumer_secret = 'JPG3dy1nvBZmvU8JrPFimbpa7gIjoMHrDwQzGXkhjjmIUF2PG8'
@@ -27,20 +32,30 @@ def clean_tweet(tweet):
     return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])| (\w+:\ / \ / \S+)", " ", tweet).split())
 
 
-def get_tweet_sentiment(tweet):
-    '''
-    Utility function to classify sentiment of passed tweet
-    using textblob's sentiment method
-    '''
-    # create TextBlob object of passed tweet text
-    # analysis = TextBlob(clean_tweet(tweet))
-    analysis = TextBlob(tweet)
-    # set sentiment
-    return analysis.sentiment
-    # return analysis.sentiment.polarity
+# def get_tweet_sentiment(tweet):
+#     '''
+#     Utility function to classify sentiment of passed tweet
+#     using textblob's sentiment method
+#     '''
+#     # create TextBlob object of passed tweet text
+#     # analysis = TextBlob(clean_tweet(tweet))
+#     analysis = TextBlob(tweet)
+#     # set sentiment
+#     return analysis.sentiment
+#     # return analysis.sentiment.polarity
 
 
-def get_tweets(query, count=300):
+def get_tweet_sentiment(sentence):
+    sentiment = SentimentIntensityAnalyzer()
+    score = sentiment.polarity_scores(sentence)
+    return score['compound']
+
+
+pos_tweets = []
+neg_tweets = []
+
+
+def get_tweets(query, c=99):
     '''
     Main function to fetch tweets and parse them.
     '''
@@ -49,11 +64,12 @@ def get_tweets(query, count=300):
     average_sentiment = 0
     num = 0
 
+    allpos = ""
+    allneg = ""
+
     try:
         # call twitter api to fetch tweets
-        fetched_tweets = api.search(q=query, count=count)
-        num = len(fetched_tweets)
-        print("length", num)
+        fetched_tweets = api.search(q=query, count=c)
         # parsing tweets one by one
         for tweet in fetched_tweets:
             # empty dictionary to store required params of a tweet
@@ -61,29 +77,24 @@ def get_tweets(query, count=300):
             # saving text of tweet
             parsed_tweet['text'] = clean_tweet(tweet.text)
             # saving sentiment of tweet
-            parsed_tweet['sentiment'] = get_tweet_sentiment(tweet.text)
             sent = get_tweet_sentiment(tweet.text)
-            average_sentiment += sent * 100
-            print(sent * 100)
-            parsed_tweet['retweets'] = tweet.retweet_count
-            # appending parsed tweet to tweets list
-            if tweet.retweet_count > 0:
-                # if tweet has retweets, ensure that it is appended only once
-                if parsed_tweet not in tweets:
-                    tweets.append(parsed_tweet)
+            if sent > 0:
+                allpos += clean_tweet(tweet.text) + " "
             else:
-                tweets.append(parsed_tweet)
+                allneg += clean_tweet(tweet.text) + " "
 
-                # return parsed tweets
-        return (average_sentiment / num)
+            average_sentiment += sent
+            num += 1
+        poswords = keywords(allpos,words = 10,scores = False, lemmatize = True, split=True)
+        negwords = keywords(allneg,words = 10,scores = False, lemmatize = True, split=True)
+        poswords2 = [i for i in poswords if len(i) > 3 and i != 'https']
+        negwords2 = [i for i in negwords if len(i) > 3 and i != 'https']
+        print(poswords2)
+        print(negwords2)
+        return json.dumps({'avg-sentiment': average_sentiment / num,
+                           'pos-keywords': poswords2,
+                           'neg-keywords': negwords2})
 
     except tweepy.TweepError as e:
         # print error (if any)
         print("Error : " + str(e))
-
-
-def get_tweet_sentiments(query):
-    return (get_tweets(query.upper()) + get_tweets(query.capitalize()) + get_tweets(query.lower()))/3
-
-
-print(get_tweet_sentiment("I knew that Trump fit the stereotypical profile of all cult leaders, which is essentially malignant narcissism, which is the narcissism – plus the psychopathic elements of feeling above the law, the pathological lying, paranoia, jealousy, the harassment."))
