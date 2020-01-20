@@ -5,9 +5,12 @@ const Titles = () => (
     <div>
         <div>
             <h1 className="main_title">tweet<span className="black">Back</span></h1>
-            <img src={Logo} alt="Smiley face" height="50" width="55"></img>
+            <img src={Logo} alt="Logo" height="300" width="320"></img>
         </div>
-        <p className="sub_title">Tweet Sentiment Analysis</p>
+        <br></br>
+        <br></br>
+        <br></br>
+        <p className="sub_title">An app that employs sentiment analysis to give you twitter's opinion on a topic.</p>
     </div>
 );
 

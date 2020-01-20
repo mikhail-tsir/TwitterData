@@ -8,12 +8,12 @@ const Weather = props => (
         </p>}
 
         {props.pos && 
-        <p className="weather__key">Positive words:
+        <p className="weather__key">Key words from positive tweets:
             <span className="weather__value"> {props.pos}</span>
         </p>}
 
         {props.neg && 
-        <p className="weather__key">Negative words:
+        <p className="weather__key">Key words from negative tweets:
             <span className="weather__value"> {props.neg}</span>
         </p>}
 

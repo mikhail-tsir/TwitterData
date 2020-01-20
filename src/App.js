@@ -5,7 +5,7 @@ import Form from "./components/Form";
 import Weather from "./components/Weather"
 
 
-const api_key = "dd456f9212f065ab8678656adea8ada4";
+
 
 
 class App extends React.Component{
@@ -15,22 +15,24 @@ class App extends React.Component{
         neg: undefined,
         error: undefined
     }
+
+    // links here
     getWeather = async(e) => {
         e.preventDefault();
-        const keyword = e.target.elements.keyword.value;
-        const random = {
-            "sentiment_avg": "0.2",
-            "positive_keywords": ["Apple", "Donald", "Duck", "Fat"],
-            "neg_keywords": ["food", "math", "movie"]
-          }
+        //keyword constant, use this
+        const word = e.target.elements.keyword.value;
+        //the following three lines should be to get POST request 
+        let xhttp = new XMLHttpRequest();
+        xhttp.open("GET", "http://127.0.0.1:8080/twitterkeyword?"+"keyword="+word, false);
+        xhttp.send(word);
+        var bob = JSON.parse(xhttp.responseText);
 
-
-        if (keyword) {
+        if (word) {
             
             this.setState({
-                sentiment_avg: random.sentiment_avg,
-                pos: random.positive_keywords,
-                neg: random.neg_keywords,
+                sentiment_avg: bob.avg_sentiment,
+                pos: bob.pos_keywords.join(", "),
+                neg: bob.neg_keywords.join(", "),
                 error: ""
             });
         } else {
