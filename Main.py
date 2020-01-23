@@ -8,10 +8,10 @@ from rake_nltk import Rake
 import json
 from gensim.summarization import keywords
 
-consumer_key = 'elSaHjf5iVQcWZcSxBJkmTpc8'
-consumer_secret = 'JPG3dy1nvBZmvU8JrPFimbpa7gIjoMHrDwQzGXkhjjmIUF2PG8'
-access_token = '1192235837003579392-DGyix5A2s1vlnUq01bfK0GPSu2Zife'
-access_token_secret = '8WyxFl3Yr1ms1fIAjajMDiaKrT9FtDZBbPbMUQAUTDsjw'
+consumer_key = 'XXXXXX'
+consumer_secret = 'XXXXXX'
+access_token = 'XXXXXX'
+access_token_secret = 'XXXXXX'
 
 try:
     # create OAuthHandler object
