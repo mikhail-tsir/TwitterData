@@ -101,7 +101,9 @@ def get_tweets(query, c=99):
                            'pos_keywords': poswords2,
                            'neg_keywords': negwords2})
 
-    except tweepy.TweepError as e:
+    except:
         # print error (if any)
         print("Error : " + str(e))
-#print(get_tweets("trump"))
+        return json.dumps({'avg_sentiment': "N/A",
+                           'pos_keywords': "N/A",
+                           'neg_keywords': "N/A"})
